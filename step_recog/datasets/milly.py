@@ -27,7 +27,7 @@ class Milly_multifeature(torch.utils.data.Dataset):
         #video_ids = os.listdir(self.data_path)
         video_ids = sorted(list(set(self.annotations.video_id)))
         # exclude some faulty videos
-        video_ids = [v for v in video_ids if v not in ['R0-P18_06',]]
+        video_ids = [v for v in video_ids if v not in ['R0-P10_06',]]
         for ii,v in tqdm.tqdm(enumerate(video_ids)):
             vid_features = sorted(os.listdir(os.path.join(self.data_path,v,self.video_layer)))
             for f in vid_features:
