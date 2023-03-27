@@ -82,7 +82,6 @@ def evaluate(model, val_loader):
     model.eval()
     outputs = []
     targets = []
-    start_time = time.clock()
     for x, label in val_loader:
         h = model.init_hidden(x.shape[0])
         out, h = model(x.to(device).float(), h)
