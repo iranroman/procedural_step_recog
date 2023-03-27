@@ -94,7 +94,7 @@ def main():
     if cfg.EVAL.ENABLE:
         print('loading best model')
         model.load_state_dict(torch.load('model_best.pt'))
-        evaluate(vl_data_loader)
+        evaluate(model,vl_data_loader)
 
 
 if __name__ == "__main__":
