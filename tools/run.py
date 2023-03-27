@@ -75,7 +75,7 @@ def main():
     if cfg.TRAIN.ENABLE:
         tr_data_loader = DataLoader(
                 tr_dataset, 
-                shuffle=False, 
+                shuffle=True, 
                 batch_size=cfg.TRAIN.BATCH_SIZE,
                 num_workers=cfg.DATALOADER.NUM_WORKERS,
                 drop_last=True) 
