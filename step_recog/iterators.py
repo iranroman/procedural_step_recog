@@ -1,0 +1,98 @@
+from step_recog.models import GRUNet
+import torch
+from torch import nn
+
+
+def train(train_loader, val_loader, learn_rate=0.001, hidden_dim=256, EPOCHS=5, model_type="GRU", output_dim = 34, n_layers=2):
+    is_cuda = torch.cuda.is_available()
+    if is_cuda:
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+    
+    # Setting common hyperparameters
+    batch_size, _, input_dim = next(iter(train_loader))[0].shape
+    # Instantiating the models
+    if model_type == "GRU":
+        model = GRUNet(input_dim, hidden_dim, output_dim, n_layers)
+    else:
+        model = LSTMNet(input_dim, hidden_dim, output_dim, n_layers)
+    model.to(device)
+    
+    # Defining loss function and optimizer
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=learn_rate)
+    
+    print("Starting Training of {} model".format(model_type))
+    # Start training loop
+    best_val_loss = float('inf')
+    for epoch in range(1,EPOCHS+1):
+        model.train()
+        h = model.init_hidden(batch_size)
+        avg_loss = 0.
+        counter = 0
+        for x, label in train_loader:
+            label = nn.functional.one_hot(label,output_dim)
+            counter += 1
+            if model_type == "GRU":
+                #h = h.data
+                h = torch.zeros_like(h)
+            else:
+                h = tuple([e.data for e in h])
+            model.zero_grad()
+
+            out, h = model(x.to(device).float(), h)
+            loss = criterion(out, label.to(device).float())
+            loss.backward()
+            optimizer.step()
+            avg_loss += loss.item()
+            if counter%200 == 0:
+                print("Epoch {}......Step: {}/{}....... Average Training Loss for Epoch: {}".format(epoch, counter, len(train_loader), avg_loss/counter))
+        print("Epoch {}/{} Done, Total training Loss: {}".format(epoch, EPOCHS, avg_loss/len(train_loader)))
+
+        model.eval()
+        h = model.init_hidden(batch_size)
+        avg_loss = 0.
+        counter = 0
+        for x, label in val_loader:
+            label = nn.functional.one_hot(label,output_dim)
+            counter += 1
+            if model_type == "GRU":
+                #h = h.data
+                h = torch.zeros_like(h)
+            else:
+                h = tuple([e.data for e in h])
+            model.zero_grad()
+
+            out, h = model(x.to(device).float(), h)
+            loss = criterion(out, label.to(device).float())
+            avg_loss += loss.item()
+            if counter%200 == 0:
+                print("Epoch {}......Step: {}/{}....... Average Validation Loss for Epoch: {}".format(epoch, counter, len(train_loader), avg_loss/counter))
+        val_loss = avg_loss/len(val_loader)
+        print("\t\t\tEpoch {}/{} Done, Total validation Loss: {}".format(epoch, EPOCHS, val_loss))
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            print("\t\t\tFound new best validation loss (saving model)")
+            torch.save(model.state_dict(),'model_best.pt')
+    return model
+
+
+def evaluate(model, test_x, test_y, label_scalers):
+    model.eval()
+    outputs = []
+    targets = []
+    start_time = time.clock()
+    for i in test_x.keys():
+        inp = torch.from_numpy(np.array(test_x[i]))
+        labs = torch.from_numpy(np.array(test_y[i]))
+        h = model.init_hidden(inp.shape[0])
+        out, h = model(inp.to(device).float(), h)
+        outputs.append(label_scalers[i].inverse_transform(out.cpu().detach().numpy()).reshape(-1))
+        targets.append(label_scalers[i].inverse_transform(labs.numpy()).reshape(-1))
+    print("Evaluation Time: {}".format(str(time.clock()-start_time)))
+    sMAPE = 0
+    for i in range(len(outputs)):
+        sMAPE += np.mean(abs(outputs[i]-targets[i])/(targets[i]+outputs[i])/2)/len(outputs)
+    print("sMAPE: {}%".format(sMAPE*100))
+    return outputs, targets, sMAPE
