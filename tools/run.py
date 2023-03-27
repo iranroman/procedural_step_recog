@@ -85,14 +85,16 @@ def main():
                 batch_size=cfg.TRAIN.BATCH_SIZE,
                 num_workers=cfg.DATALOADER.NUM_WORKERS,
                 drop_last=True) 
-        train(tr_data_loader, 
+        model = train(tr_data_loader, 
                 vl_data_loader,
                 learn_rate = cfg.TRAIN.LR, 
                 hidden_dim = cfg.MODEL.HIDDEN_SIZE, 
                 EPOCHS = cfg.TRAIN.EPOCHS, 
                 output_dim = cfg.MODEL.OUTPUT_DIM)
     if cfg.EVAL.ENABLE:
-        evaluate(cfg)
+        print('loading best model')
+        model.load_state_dict('model_best.pt')
+        evaluate(vl_data_loader)
 
 
 if __name__ == "__main__":
