@@ -29,14 +29,18 @@ class Milly_multifeature(torch.utils.data.Dataset):
         # exclude some faulty videos
         video_ids = [v for v in video_ids if v not in ['R1-P10_06','R2-P04_08']]
         for v in tqdm.tqdm(video_ids, total=len(video_ids)):
+            vid_last_step_frame = self.annotations[self.annotations.video_id==drecord['video_id']].iloc[-1].stop_frame
+            print(type(vid_last_step_frame))
             vid_features = sorted(os.listdir(os.path.join(self.data_path,v,self.video_layer)))
             for f in vid_features:
-                self.datapoints[ipoint] = {
-                            'video_id':v,
-                            'npy_file':f,
-                            'frame':int(f.split('_')[1][:-4])
-                        }
-                ipoint += 1
+                curr_frame = int(f.split('_')[1][:-4])
+                if curr_frame < vid_last_step_frame:
+                    self.datapoints[ipoint] = {
+                                'video_id':v,
+                                'npy_file':f,
+                                'frame': curr_frame
+                            }
+                    ipoint += 1
 
     def __getitem__(self, index):
         drecord = self.datapoints[index]
