@@ -93,7 +93,7 @@ def main():
                 output_dim = cfg.MODEL.OUTPUT_DIM)
     if cfg.EVAL.ENABLE:
         print('loading best model')
-        model.load_state_dict('model_best.pt')
+        model.load_state_dict(torch.load('model_best.pt'))
         evaluate(vl_data_loader)
 
 
