@@ -1,6 +1,7 @@
 from step_recog.models import GRUNet
 import torch
 from torch import nn
+import numpy as np
 
 
 def train(train_loader, val_loader, learn_rate=0.001, hidden_dim=256, EPOCHS=5, model_type="GRU", output_dim = 34, n_layers=2):
