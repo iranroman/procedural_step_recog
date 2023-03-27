@@ -79,6 +79,12 @@ def train(train_loader, val_loader, learn_rate=0.001, hidden_dim=256, EPOCHS=5, 
 
 
 def evaluate(model, val_loader):
+    is_cuda = torch.cuda.is_available()
+    if is_cuda:
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+
     model.eval()
     outputs = []
     targets = []
