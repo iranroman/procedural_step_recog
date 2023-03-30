@@ -17,6 +17,8 @@ class GRUNet(nn.Module):
         
         self.rgb_fc = nn.Linear(rgb_size, int(input_dim/2))
         self.audio_fc = nn.Linear(audio_size, int(input_dim/2))
+        self.rgb_bn = nn.BatchNorm1d(int(input_dim/2))
+        self.aud_bn = nn.BatchNorm1d(int(input_dim/2))
         self.gru = nn.GRU(input_dim, hidden_dim, n_layers, batch_first=True, dropout=drop_prob)
         self.fc = nn.Linear(hidden_dim, output_dim)
         self.relu = nn.ReLU()
@@ -24,6 +26,8 @@ class GRUNet(nn.Module):
     def forward(self, x, h):
         rgb_in = self.rgb_fc(x[0])
         aud_in = self.audio_fc(x[1])
+        aud_in = self.relu(self.aud_bn(aud_in))
+        rgb_in = self.relu(self.rgb_bn(rgb_in))
         x = torch.concat((rgb_in,aud_in),-1)
         out, h = self.gru(x, h)
         out = self.fc(self.relu(out[:,-1]))

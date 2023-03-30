@@ -91,7 +91,7 @@ def evaluate(model, val_loader):
     targets = []
     for x, label in val_loader:
         h = model.init_hidden(x.shape[0])
-        out, h = model(x.to(device).float(), h)
+        out, h = model((x[0].to(device).float(),x[1].to(device)), h)
         outputs.append(np.argmax(out.cpu().detach().numpy(),axis=1))
         targets.append(label.numpy())
     outputs = np.concatenate(outputs)
