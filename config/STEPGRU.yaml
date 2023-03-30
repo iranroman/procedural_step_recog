@@ -4,7 +4,8 @@ MODEL:
   OUTPUT_DIM: 34
 DATASET:
   NAME: 'Milly'
-  LOCATION: '/datasets/omni_milly'
+  LOCATION: '/vast/irr2020/omni_milly'
+  AUDIO: '/vast/irr2020/audiosf-milly'
   VIDEO_LAYER: 'shoulders'
   TR_ANNOTATIONS_FILE: 'Milly_train.csv'
   VL_ANNOTATIONS_FILE: 'Milly_validation.csv'

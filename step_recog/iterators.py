@@ -42,7 +42,7 @@ def train(train_loader, val_loader, learn_rate=0.001, hidden_dim=256, EPOCHS=5, 
                 h = tuple([e.data for e in h])
             model.zero_grad()
 
-            out, h = model(x.to(device).float(), h)
+            out, h = model((x[0].to(device).float(),x[1].to(device).float()), h)
             loss = criterion(out, label.to(device).float())
             loss.backward()
             optimizer.step()

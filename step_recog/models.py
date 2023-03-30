@@ -10,16 +10,21 @@ else:
     device = torch.device("cpu")
 
 class GRUNet(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, n_layers, drop_prob=0.2):
+    def __init__(self, rgb_size, audio_size, input_dim, hidden_dim, output_dim, n_layers, drop_prob=0.2):
         super(GRUNet, self).__init__()
         self.hidden_dim = hidden_dim
         self.n_layers = n_layers
         
+        self.rgb_fc = nn.Linear(rgb_size, input_dim/2)
+        self.audio_fc = nn.Linear(audio_size, input_dim/2)
         self.gru = nn.GRU(input_dim, hidden_dim, n_layers, batch_first=True, dropout=drop_prob)
         self.fc = nn.Linear(hidden_dim, output_dim)
         self.relu = nn.ReLU()
         
     def forward(self, x, h):
+        rgb_in = self.rgb_fc(x[0])
+        aud_in = self.rgb_fc(x[1])
+        x = torch.concat((rgb_in,aud_in),1)
         out, h = self.gru(x, h)
         out = self.fc(self.relu(out[:,-1]))
         return out, h
