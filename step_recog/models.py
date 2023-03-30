@@ -15,8 +15,8 @@ class GRUNet(nn.Module):
         self.hidden_dim = hidden_dim
         self.n_layers = n_layers
         
-        self.rgb_fc = nn.Linear(rgb_size, input_dim/2)
-        self.audio_fc = nn.Linear(audio_size, input_dim/2)
+        self.rgb_fc = nn.Linear(rgb_size, int(input_dim/2))
+        self.audio_fc = nn.Linear(audio_size, int(input_dim/2))
         self.gru = nn.GRU(input_dim, hidden_dim, n_layers, batch_first=True, dropout=drop_prob)
         self.fc = nn.Linear(hidden_dim, output_dim)
         self.relu = nn.ReLU()
