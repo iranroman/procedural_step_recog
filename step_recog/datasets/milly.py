@@ -9,7 +9,7 @@ class Milly_multifeature(torch.utils.data.Dataset):
     def __init__(self, cfg, split='train'):
 
         self.data_path = cfg.DATASET.LOCATION
-        self.data_path_audio = cfg.DATASET_AUDIO.LOCATION
+        self.data_path_audio = cfg.DATASET.AUDIO_LOCATION
         self.video_layer = cfg.DATASET.VIDEO_LAYER
         if split=='train':
             self.annotations_file = cfg.DATASET.TR_ANNOTATIONS_FILE
