@@ -61,7 +61,7 @@ class Milly_multifeature(torch.utils.data.Dataset):
                 frames_audio.append(np.load(frame_feats_path_audio))
             else:
                 print(f'audio data for frame {loading_frame} in {drecord["video_id"]} not found. Recycling frame features')
-                frames_audio.append(0.0001*np.random.randn(*np.load(os.path.join(self.data_path_audio,'R1-P00_00',self.video_layer,'frame_0000000060.npy')).shape)
+                frames_audio.append(0.0001*np.random.randn(*np.load(os.path.join(self.data_path_audio,'R1-P00_00',self.video_layer,'frame_0000000060.npy')).shape))
             loading_frame -= int(self.video_fps * self.slide_hop_size) 
         video_features = np.flip(np.vstack(frames),axis=0)
         audio_features = np.flip(np.vstack(frames_audio),axis=0)
