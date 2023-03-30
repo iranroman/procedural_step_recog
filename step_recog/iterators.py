@@ -15,7 +15,7 @@ def train(train_loader, val_loader, learn_rate=0.001, hidden_dim=256, EPOCHS=5, 
     batch_size, _, input_dim = next(iter(train_loader))[0][0].shape
     # Instantiating the models
     if model_type == "GRU":
-        model = GRUNet(1024,3204,input_dim, hidden_dim, output_dim, n_layers)
+        model = GRUNet(1024,2304,input_dim, hidden_dim, output_dim, n_layers)
     else:
         model = LSTMNet(input_dim, hidden_dim, output_dim, n_layers)
     model.to(device)
