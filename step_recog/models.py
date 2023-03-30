@@ -23,7 +23,7 @@ class GRUNet(nn.Module):
         
     def forward(self, x, h):
         rgb_in = self.rgb_fc(x[0])
-        aud_in = self.rgb_fc(x[1])
+        aud_in = self.audio_fc(x[1])
         x = torch.concat((rgb_in,aud_in),1)
         out, h = self.gru(x, h)
         out = self.fc(self.relu(out[:,-1]))
