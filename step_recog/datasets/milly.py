@@ -82,12 +82,12 @@ class Milly_multifeature(torch.utils.data.Dataset):
         wins = []
         for step in drecord['steps_frames']:
 
-            if self.time_augs:
-                taug = self.rng.choice(3,replace=False) # 20 possible augmentations
-            else:
-                taug = 0
             hop_size = time_augs[taug]
             win_size = win_sizes[taug]
+            if self.time_augs:
+                nexttaug = self.rng.choice(3,replace=False) # 20 possible augmentations
+            else:
+                nexttaug = 0
             print(hop_size)
             # fill-in before
             while step[0] > curr_frame:
@@ -95,19 +95,28 @@ class Milly_multifeature(torch.utils.data.Dataset):
                 labels.append(8) # hard-coded for now. SORRY!!!
                 wins.append(win_size)
                 curr_frame += hop_size
-            
-            if self.time_augs:
-                taug = self.rng.choice(3,replace=False) # 20 possible augmentations
-            else:
-                taug = 0
+                if curr_frame > time_augs[nexttaug]*int(step[1]/time_augs[nexttaug]):
+                    curr_frame -= hop_size
+                    break
+            taug = nexttaug
             hop_size = time_augs[taug]
             win_size = win_sizes[taug]
+            if self.time_augs:
+                nexttaug = self.rng.choice(3,replace=False) # 20 possible augmentations
+            else:
+                nexttaug = 0
             # fill-in the step
             while step[1] > curr_frame:
                 frames.append(curr_frame)
                 labels.append(step[-1])
                 wins.append(win_size)
                 curr_frame += hop_size
+                if curr_frame > time_augs[nexttaug]*int(step[1]/time_augs[nexttaug]):
+                    curr_frame -= hop_size
+                    break
+            taug = nexttaug
+        print(list(zip(frames,labels,wins)))
+        input()
 
         # now generate the paths to files to be loaded
         omni_paths = ['{}/{}_aug{}_{}secwin/{}/frame_{:010d}.npy'.format(self.data_path,drecord['video_id'],iaug,w,self.video_layer,int(f)) for f,w in zip(frames,wins)]
