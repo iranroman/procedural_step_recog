@@ -27,7 +27,7 @@ _C.EVAL.ENABLE = True
 # -----------------------------------------------------------------------------
 _C.MODEL = CfgNode()
 _C.MODEL.HIDDEN_SIZE = 1024
-_C.MODEL.CONTEXT_LENGTH = 4
+_C.MODEL.CONTEXT_LENGTH = 'all'
 _C.MODEL.OUTPUT_DIM = 33
 
 # -----------------------------------------------------------------------------
@@ -42,6 +42,8 @@ _C.DATASET.TR_ANNOTATIONS_FILE = ''
 _C.DATASET.VL_ANNOTATIONS_FILE = ''
 _C.DATASET.HOP_SIZE = 0.5
 _C.DATASET.FPS = 30
+_C.DATASET.INCLUDE_IMAGE_AUGMENTATIONS = False
+_C.DATASET.INCLUDE_TIME_AUGMENTATIONS = False
 
 # -----------------------------------------------------------------------------
 # Dataloader options

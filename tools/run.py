@@ -71,6 +71,7 @@ def main():
     # build the dataset
     tr_dataset = Milly_multifeature(cfg, split='train')
     vl_dataset = Milly_multifeature(cfg, split='validation')
+    ts_dataset = Milly_multifeature(cfg, split='test')
 
     if cfg.TRAIN.ENABLE:
         tr_data_loader = DataLoader(

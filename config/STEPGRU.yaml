@@ -1,18 +1,20 @@
 MODEL:
   HIDDEN_SIZE: 1024
-  CONTEXT_LENGTH: 4
-  OUTPUT_DIM: 34
+  CONTEXT_LENGTH: 'full'
+  OUTPUT_DIM: 9 # offset 34
 DATASET:
   NAME: 'Milly'
-  LOCATION: '/vast/irr2020/omni_milly'
-  AUDIO_LOCATION: '/vast/irr2020/audiosf_milly'
+  LOCATION: '/vast/irr2020/omni_bbn'
+  AUDIO_LOCATION: ''
   VIDEO_LAYER: 'shoulders'
-  TR_ANNOTATIONS_FILE: 'Milly_train.csv'
-  VL_ANNOTATIONS_FILE: 'Milly_validation.csv'
+  TR_ANNOTATIONS_FILE: 'BBN_train.csv'
+  VL_ANNOTATIONS_FILE: 'BBN_validation.csv'
+  INCLUDE_IMAGE_AUGMENTATIONS: True
+  INCLUDE_TIME_AUGMENTATIONS: True
   FPS: 30
   HOP_SIZE: 0.5 # in seconds
 DATALOADER:
-  NUM_WORKERS: 8
+  NUM_WORKERS: 12
   PIN_MEMORY: True
 TRAIN:
   ENABLE: True
