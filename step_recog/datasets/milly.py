@@ -75,7 +75,7 @@ class Milly_multifeature(torch.utils.data.Dataset):
         
         # buffer up filenames and labels
         taug = 0
-        curr_frame = 60
+        curr_frame = 120
         hop_size = 15 # in units of frames
         frames = []
         labels = []
