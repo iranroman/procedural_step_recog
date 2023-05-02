@@ -146,9 +146,9 @@ class Milly_multifeature(torch.utils.data.Dataset):
             obj_boxes = np.load(b)['boxes']
             obj_conf = np.load(b)['confs']
             if len(obj_features) > 0:
-                obj_features = np.concatenate(obj_features)
-                obj_boxes = np.concatenate(obj_boxes)
-                obj_conf = np.concatenate(obj_conf)[...,np.newaxis]
+                obj_features = obj_features
+                obj_boxes = obj_boxes
+                obj_conf = obj_conf[:,np.newaxis]
                 obj_features = np.concatenate((obj_features,obj_boxes,obj_conf),axis=1)
             else:
                 print('filling empty object detections')
