@@ -91,7 +91,7 @@ class Milly_multifeature(torch.utils.data.Dataset):
             # fill-in before
             while True:
                 if curr_frame > time_augs[nexttaug]*int(step[0]/time_augs[nexttaug]):
-                    curr_frame -= hop_size
+                    curr_frame = time_augs[nexttaug]*int((curr_frame-hop_size)/time_augs[nexttaug])
                     curr_frame += time_augs[nexttaug]
                     break
                 else:
@@ -109,7 +109,7 @@ class Milly_multifeature(torch.utils.data.Dataset):
             # fill-in the step
             while True:
                 if curr_frame > time_augs[nexttaug]*int(step[1]/time_augs[nexttaug]):
-                    curr_frame -= hop_size
+                    curr_frame = time_augs[nexttaug]*int((curr_frame-hop_size)/time_augs[nexttaug])
                     curr_frame += time_augs[nexttaug]
                     break
                 else:
@@ -127,13 +127,15 @@ class Milly_multifeature(torch.utils.data.Dataset):
         #        print()
         #        curr_l = l
         #        print(f,l,w)
+        #input()
 
         # now generate the paths to files to be loaded
-        omni_paths = ['{}/{}_aug{}_{}secwin/{}/frame_{:010d}.npy'.format(self.data_path,drecord['video_id'],iaug,w,self.video_layer,int(f)) for f,w in zip(frames,wins)]
         if iaug > -1:
+            omni_paths = ['{}/{}_aug{}_{}secwin/{}/frame_{:010d}.npy'.format(self.data_path,drecord['video_id'],iaug,w,self.video_layer,int(f)) for f,w in zip(frames,wins)]
             obj_paths = ['/vast/bs3639/BBN/aug_yolo/{}_aug{}/frame_{:010d}.npz'.format(drecord['video_id'],iaug,int(f)) for f in frames]
             frame_paths = ['/vast/bs3639/BBN/aug_clip/{}_aug{}/frame_{:010d}.npy'.format(drecord['video_id'],iaug,int(f)) for f in frames]
         else:
+            omni_paths = ['{}/{}_{}secwin/{}/frame_{:010d}.npy'.format(self.data_path,drecord['video_id'],w,self.video_layer,int(f)) for f,w in zip(frames,wins)]
             obj_paths = ['/vast/bs3639/BBN/yolo/{}/frame_{:010d}.npz'.format(drecord['video_id'],int(f)) for f in frames]
             frame_paths = ['/vast/bs3639/BBN/clip/{}/frame_{:010d}.npy'.format(drecord['video_id'],int(f)) for f in frames]
         omni_embeddings = []
@@ -159,42 +161,7 @@ class Milly_multifeature(torch.utils.data.Dataset):
                 obj_features = np.pad(obj_features,((0,25-len(obj_features)),(0,0)))
             obj_embeddings.append(obj_features)
             frame_embeddings.append(np.load(f))
-        print(torch.from_numpy(np.array(omni_embeddings)).shape, torch.from_numpy(np.array(obj_embeddings)).shape, torch.from_numpy(np.array(frame_embeddings)).shape)
-        input()
         return torch.from_numpy(np.array(omni_embeddings)), torch.from_numpy(np.array(obj_embeddings)), torch.from_numpy(np.array(frame_embeddings)),
-
-
-
-
-        
-
-        #print(drecord)
-        #input()
-        #last_frame = drecord['frame']
-        #first_frame = last_frame - self.context_length * self.video_fps * self.slide_hop_size
-        #loading_frame = last_frame
-        #frames = []
-        #frames_audio = []
-        #while loading_frame > first_frame:
-        #    frame_feats_path = os.path.join(self.data_path,drecord['video_id'],self.video_layer,'frame_{:010d}.npy'.format(loading_frame))
-        #    frame_feats_path_audio = os.path.join(self.data_path_audio,drecord['video_id'],self.video_layer,'frame_{:010d}.npy'.format(loading_frame))
-        #    if os.path.exists(frame_feats_path):
-        #        frames.append(np.load(frame_feats_path))
-        #    else:
-        #        print(f'data for frame {loading_frame} not found. Recycling frame features')
-        #        frames.append(frames[-1])
-        #    if os.path.exists(frame_feats_path_audio):
-        #        frames_audio.append(np.load(frame_feats_path_audio))
-        #    else:
-        #        print(f'audio data for frame {loading_frame} in {drecord["video_id"]} not found. Recycling frame features')
-        #        frames_audio.append(0.0001*np.random.randn(*np.load(os.path.join(self.data_path_audio,'R1-P00_00',self.video_layer,'frame_0000000060.npy')).shape))
-        #    loading_frame -= int(self.video_fps * self.slide_hop_size) 
-        #video_features = np.flip(np.vstack(frames),axis=0)
-        #audio_features = np.flip(np.vstack(frames_audio),axis=0)
-        #vid_steps = self.annotations[self.annotations.video_id==drecord['video_id']]
-        #action_idx = sum((drecord['frame'] - vid_steps['stop_frame'])>0)
-        #step_label = vid_steps.iloc[action_idx].verb_class
-        #return (torch.from_numpy(np.ascontiguousarray(video_features)), torch.from_numpy(np.ascontiguousarray(audio_features))), step_label
 
     def __len__(self):
         return len(self.datapoints)
