@@ -158,7 +158,7 @@ class Milly_multifeature(torch.utils.data.Dataset):
             if len(obj_features) > 25: # hard-coded for now
                 obj_features = obj_features[:25]
             else:
-                obj_features = np.pad(obj_features,(0,25-len(obj_features)))
+                obj_features = np.pad(obj_features,((0,25-len(obj_features)),(0,0)))
             print(obj_features.shape)
             obj_embeddings.append(obj_features)
             frame_embeddings.append(np.load(f))
