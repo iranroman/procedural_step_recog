@@ -135,13 +135,25 @@ class Milly_multifeature(torch.utils.data.Dataset):
             frame_paths = ['/vast/bs3639/BBN/aug_clip/{}_aug{}/frame_{:010d}.npy'.format(drecord['video_id'],iaug,int(f)) for f in frames]
         else:
             obj_paths = ['/vast/bs3639/BBN/yolo/{}/frame_{:010d}.npz'.format(drecord['video_id'],int(f)) for f in frames]
-            frame_paths = ['/vast/bs3639/BBN/clip/{}_aug{}/frame_{:010d}.npy'.format(drecord['video_id'],int(f)) for f in frames]
+            frame_paths = ['/vast/bs3639/BBN/clip/{}/frame_{:010d}.npy'.format(drecord['video_id'],int(f)) for f in frames]
         omni_embeddings = []
         obj_embeddings = []
         frame_embeddings = []
         for o,b,f in zip(omni_paths,obj_paths,frame_paths):
+            print(np.load(o).shape)
             omni_embeddings.append(np.load(o))
-            obj_embeddings.append(np.load(b))
+            print(np.load(b).shape)
+            obj_features = np.load(b)['features']
+            obj_boxes = np.load(b)['boxes']
+            obj_conf = np.load(b)['conf'][...,np.newaxis]
+            obj_features = np.concatenate((obj_features,obj_boxes,obj_conf),axis=1)
+            print(obj_features.shape)
+            if len(obj_features) > 25: # hard-coded for now
+                obj_features = obj_features[:25]
+            else:
+                obj_features = np.pad(obj_features,(0,25-len(obj_features)))
+            print(obj_features.shape)
+            obj_embeddings.append(obj_features)
             frame_embeddings.append(np.load(f))
 
 
