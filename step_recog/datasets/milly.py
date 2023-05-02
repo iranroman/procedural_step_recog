@@ -140,11 +140,20 @@ class Milly_multifeature(torch.utils.data.Dataset):
         obj_embeddings = []
         frame_embeddings = []
         for o,b,f in zip(omni_paths,obj_paths,frame_paths):
+            print(o,b,f)
             omni_embeddings.append(np.load(o))
-            obj_features = np.concatenate(np.load(b)['features'])
-            obj_boxes = np.concatenate(np.load(b)['boxes'])
-            obj_conf = np.concatenate(np.load(b)['confs'])[...,np.newaxis]
-            obj_features = np.concatenate((obj_features,obj_boxes,obj_conf),axis=1)
+            obj_features = np.load(b)['features']
+            obj_boxes = np.load(b)['boxes']
+            obj_conf = np.load(b)['confs'][...,np.newaxis]
+            if len(obj_features) > 0:
+                obj_features = np.concatenate(obj_features)
+                obj_boxes = np.concatenate(obj_boxes)
+                obj_conf = np.concatenate(obj_conf)
+                obj_features = np.concatenate((obj_features,obj_boxes,obj_conf),axis=1)
+            else:
+                print('filling empty object detections')
+                obj_features = np.zeros((25,517))
+
             print(obj_features.shape)
             if len(obj_features) > 25: # hard-coded for now
                 obj_features = obj_features[:25]
@@ -153,6 +162,7 @@ class Milly_multifeature(torch.utils.data.Dataset):
             print(obj_features.shape)
             obj_embeddings.append(obj_features)
             frame_embeddings.append(np.load(f))
+            input()
 
 
 
