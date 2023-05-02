@@ -140,7 +140,6 @@ class Milly_multifeature(torch.utils.data.Dataset):
         obj_embeddings = []
         frame_embeddings = []
         for o,b,f in zip(omni_paths,obj_paths,frame_paths):
-            print(o,b,f)
             omni_embeddings.append(np.load(o))
             obj_features = np.load(b)['features']
             obj_boxes = np.load(b)['boxes']
@@ -153,16 +152,16 @@ class Milly_multifeature(torch.utils.data.Dataset):
             else:
                 print('filling empty object detections')
                 obj_features = np.zeros((25,517))
-
-            print(obj_features.shape)
+            np.random.shuffle(obj_features)
             if len(obj_features) > 25: # hard-coded for now
                 obj_features = obj_features[:25]
             else:
                 obj_features = np.pad(obj_features,((0,25-len(obj_features)),(0,0)))
-            print(obj_features.shape)
             obj_embeddings.append(obj_features)
             frame_embeddings.append(np.load(f))
-            input()
+        print(torch.from_numpy(np.array(omni_embeddings)).shape, torch.from_numpy(np.array(obj_embeddings)).shape, torch.from_numpy(np.array(frame_embeddings)).shape)
+        input()
+        return torch.from_numpy(np.array(omni_embeddings)), torch.from_numpy(np.array(obj_embeddings)), torch.from_numpy(np.array(frame_embeddings)),
 
 
 
