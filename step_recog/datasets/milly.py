@@ -143,7 +143,7 @@ class Milly_multifeature(torch.utils.data.Dataset):
             omni_embeddings.append(np.load(o))
             obj_features = np.concatenate(np.load(b)['features'])
             obj_boxes = np.concatenate(np.load(b)['boxes'])
-            obj_conf = np.concatenate(np.load(b)['conf'])[...,np.newaxis]
+            obj_conf = np.concatenate(np.load(b)['confs'])[...,np.newaxis]
             obj_features = np.concatenate((obj_features,obj_boxes,obj_conf),axis=1)
             print(obj_features.shape)
             if len(obj_features) > 25: # hard-coded for now
