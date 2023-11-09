@@ -34,7 +34,6 @@ python tools/run_act_recog.py --cfg $CONFIG_PATH
 EOF
 EOSBATCH
 
-## sed -e 's/$NV --overlay "$OVERLAY:ro" $@ "$SIF"/$NV $@ --overlay "$OVERLAY:ro" "$SIF"/' -i sing
 }
 
 function exec_with_squash()
@@ -56,9 +55,6 @@ fi
 echo "|-- Create SquashFS for $NAME"
 
 TMP=$OUTPUT_PATH/tmp_$NAME
-
-#echo $ADD_OVER
-break
 
 sbatch <<EOSBATCH
 #!/bin/bash
@@ -100,69 +96,13 @@ done
 
 if $squash_files == "true"; then
 
+##We have to pass only a couple of k files at once because of HPC quota or time restrictions
 SEARCH_FOR=(
 #  "M1-13.sqf"     #OK
 #  "M1-14.sqf"     #OK 
-#  "M1-15.sqf"     #OK
-#  "M1-16.sqf"     #OK
-#  "M1-17.sqf"     #OK 
-#  "M1-18.sqf"     #OK
-#  "M1-19.sqf"     #OK
-#  "M1-20.sqf"     #OK
-#  "M1-21.sqf"     #OK
-#  "M1-22.sqf"     #OK
-#  "M1-23.sqf"     #OK
-#  "M1-24.sqf"     #OK 
-#  "M1-25.sqf"     #OK
-#  "M1-26.sqf"     #OK
-#  "M1-27.sqf"     #OK
-#  "M1-28.sqf"     #OK
-#  "M1-29.sqf"     #OK
-#  "M1-30.sqf"     #OK
-#  "M1-31.sqf"     #OK
-#  "M1-32.sqf"     #OK
-#  "M1-33.sqf"     ##TEST
-#  "M1-34.sqf"     #OK
-#  "M1-35.sqf"     #OK 
-#  "M1-36.sqf"     #OK
-#  "M1-37.sqf"     #OK
-#  "M1-39.sqf"     #OK 
-#  "M1-40.sqf"     #OK 
-#  "M1-41.sqf"     #OK
-#  "M1-42.sqf"     #OK 
-#  "M1-43.sqf"     ##TEST
-#  "M1-44.sqf"     #OK
-#  "M1-45.sqf"     #OK 
-#  "M1-46.sqf"     #OK
-#  "M1-47.sqf"     #OK
-#  "M1-57.sqf"     #OK
-#  "M1-58.sqf"     #OK 
-#  "M1-59.sqf"     #OK
-#  "M1-60.sqf"     #OK
-#  "M1-61.sqf"     #OK
-#  "M1-62.sqf"     #OK
-#  "M1-63.sqf"     #OK
-#  "M1-64.sqf"     #OK
-#  "M1-65.sqf"     ##TEST
-#  "M1-66.sqf"     #OK
-#  "M1-67.sqf"     #OK
-#  "M1-68.sqf"     #OK
-#  "M1-69.sqf"     ##TEST
-#  "M1-70.sqf"     #OK
-#  "M1-71.sqf"     #OK
-#  "M1-72.sqf"     ##TEST
-#  "M1-73.sqf"     #OK
-#  "M1-74.sqf"     #OK
-#  "M1-75.sqf"     #OK
-#  "M1-76.sqf"     #OK
 )
 
-##  sed -e 's/$NV $@ --overlay "$OVERLAY:ro" "$SIF"/$NV --overlay "$OVERLAY:ro" $@ "$SIF"/' -i sing
-
   exec_with_squash
-
-##  sed -e 's/$NV --overlay "$OVERLAY:ro" $@ "$SIF"/$NV $@ --overlay "$OVERLAY:ro" "$SIF"/' -i sing
 else
   exec  
 fi
-##

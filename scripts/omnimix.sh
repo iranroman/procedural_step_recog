@@ -8,10 +8,6 @@ AUDIO_PATH=$3/*sqf
 CONFIG_PATH=$4
 ADD_OVER=""
 
-#echo $ACTION_PATH
-#echo $IMG_PATH
-#echo $AUDIO_PATH
-
 if [[ ! -z $1 ]]; then
   for action in $ACTION_PATH; do
     ADD_OVER="$ADD_OVER --overlay $action:ro"
@@ -35,11 +31,6 @@ if [[ ! -z $3 ]]; then
   done
 fi
 
-#echo $ADD_OVER
-#exit
-
-## sed -e 's/$NV $@ --overlay "$OVERLAY:ro" "$SIF"/$NV --overlay "$OVERLAY:ro" $@ "$SIF"/' -i sing
-
 sbatch <<EOSBATCH
 #!/bin/bash
 #SBATCH -c 12
@@ -62,6 +53,3 @@ python tools/run_step_recog.py --cfg $CONFIG_PATH
 EOF
 
 EOSBATCH
-
-## sed -e 's/$NV --overlay "$OVERLAY:ro" $@ "$SIF"/$NV $@ --overlay "$OVERLAY:ro" "$SIF"/' -i sing
-
