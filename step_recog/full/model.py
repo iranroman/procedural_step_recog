@@ -15,6 +15,8 @@ from .download import cached_download_file
 
 
 class StepPredictor(nn.Module):
+    """Step prediction model that takes in frames and outputs step probabilities.
+    """
     def __init__(self, cfg_file):
         super().__init__()
         # load config
@@ -48,12 +50,10 @@ class StepPredictor(nn.Module):
         
         # frame buffers and model state
         self.omnivore_input_queue = deque(maxlen=32)
-        self.omnivore_output_queue = deque(maxlen=8)
-        self.h = None
+        self.h = None  # QUESTION: Should this be an argument to the forward function instead? If so, then should the queues also be part of the "hidden state"?
 
     def reset(self):
         self.omnivore_input_queue.clear()
-        self.omnivore_output_queue.clear()
         self.h = None
 
     def forward(self, image):
@@ -90,10 +90,6 @@ class StepPredictor(nn.Module):
             X_omnivore = torch.stack(list(self.omnivore_input_queue), dim=1)[None]
             _, Z_action = self.omnivore(X_omnivore, return_embedding=True)
             Z_action = Z_action[None]
-
-            # # rolling buffer of omnivore output embeddings
-            # self.omnivore_output_queue.append(Z_action)
-            # Z_action = torch.cat(list(self.omnivore_output_queue), dim=0)[None]
 
         # mix it all together
         prob_step, self.h = self.head(Z_action, self.h, Z_audio, Z_objects, Z_frame)

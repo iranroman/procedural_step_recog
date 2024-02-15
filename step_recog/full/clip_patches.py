@@ -6,6 +6,11 @@ import clip
 
 
 class ClipPatches(nn.Module):
+    '''Given an image and bounding boxes, create clip embeddings for the image within each bounding box. 
+    Optionally, also include the clip embedding for the whole frame. 
+    TODO: this could be implemented with a "whole frame bounding box".
+
+    '''
     def __init__(self):
         super().__init__()
         self.model, self.transform = clip.load("ViT-B/16", jit=False)

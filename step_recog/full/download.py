@@ -14,6 +14,9 @@ def cached_download_file(
     file_name: Optional[str] = None,
     progress: bool = True
 ) -> str:
+    '''Download and cache pytorch checkpoints (or any file, really) from a url.
+    
+    '''
     if not url or not any(url.startswith(prefix) for prefix in SUPPORTED_PROTOCOLS):
         return url
     model_dir = model_dir or os.path.join(get_dir(), 'checkpoints', __name__.split('.')[0])

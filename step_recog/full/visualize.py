@@ -10,6 +10,9 @@ import ipdb
 @ipdb.iex
 @torch.no_grad()
 def main(video_path, output_path='output.mp4', skill="M3"):
+    '''Visualize the outputs of the model on a video.
+
+    '''
     # define model
     model = StepPredictor(skill)
 
