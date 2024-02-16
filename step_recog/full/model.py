@@ -65,9 +65,9 @@ class StepPredictor(nn.Module):
             boxes = results[0].boxes
             Z_clip = self.clip_patches(image, boxes.xywh, include_frame=True)
 
-            # concatenate with boxes
+            # concatenate with boxes and confidence
             Z_frame = torch.cat([Z_clip[:1], torch.tensor([[0, 0, 1, 1, 1]]).to(Z_clip.device)], dim=1)
-            Z_objects = torch.cat([Z_clip[1:], boxes.xywhn, boxes.conf[:, None]], dim=1)
+            Z_objects = torch.cat([Z_clip[1:], boxes.xyxyn, boxes.conf[:, None]], dim=1)  ##TODO: deticn_bbn.py:Extractor.compute_store_clip_boxes returns xyxyn
             # pad boxes to size
             _pad = torch.zeros((max(self.MAX_OBJECTS - Z_objects.shape[0], 0), Z_objects.shape[1])).to(Z_objects.device)
             Z_objects = torch.cat([Z_objects, _pad])[:self.MAX_OBJECTS]
@@ -93,5 +93,5 @@ class StepPredictor(nn.Module):
 
         # mix it all together
         prob_step, self.h = self.head(Z_action, self.h, Z_audio, Z_objects, Z_frame)
-        prob_step = torch.softmax(prob_step, dim=-1)
+        prob_step = torch.softmax(prob_step[..., :-2], dim=-1) #prob_step has <n classe positions> <1 no step position> <2 begin-end frame identifiers>
         return prob_step
