@@ -1,0 +1,61 @@
+_BASE_: STEPGRU_BASE.yaml
+MODEL:
+  OMNIGRU_CHECKPOINT_URL: 
+  OUTPUT_DIM: 36
+
+SKILLS:
+  - NAME: M1 - Trauma Assessment
+    STEPS:
+    - Optionally unclothe depending on situation.
+    - Sweep* left leg.
+    - Sweep* right leg.
+    - Sweep* left arm.
+    - Sweep* right arm.
+    - Look Listen Feel Breathing.
+    - Rake** chest.
+    - Roll over casualty.
+    - Rake the back and buttocks.
+    - Check pulse.
+    - Check skin temperature/quality.
+    - Expose and look at chest.
+    - Optionally reclothe depending on situation.
+
+
+  - NAME: M2 - Apply Tourniquet
+    STEPS:
+    - Place tourniquet over affected extremity 2-3 inches above wound site.
+    - Pull tourniquet tight.
+    - Apply strap to strap body.
+    - Turn windless clock wise or counter clockwise until hemorrhage is controlled.
+    - Lock windless into the windless keeper.
+    - Pull remaining strap over the windless keeper.
+    - Secure strap and windless keeper with keeper securing device.
+    - Mark time on securing device strap with permanent marker.    
+
+
+  - NAME: M3 - Apply pressure dressing
+    STEPS:
+    - Apply direct hand pressure.
+    - Open dressing packaging.
+    - Apply dressing with pressure point directly over wound site.
+    - Wrap dressing around affected area extremity or trunk with 80 percent elastic stretch.
+    - Secure dressing with securing device.
+
+
+  - NAME: M5 - X-Stat
+    STEPS:
+    - Open inner packaging and remove applicator.
+    - Insert applicator into wound track as close to bleeding source as possible.
+    - Insert plunger into applicator.
+    - Push plunger firmly to deploy sponges into wound.
+    - Apply manual pressure if necessary.    
+
+
+  - NAME: R18 - Apply chest seal
+    STEPS:
+    - With gloved hand, cover and seal wound site. 
+    - Open vented chest seal package.
+    - Wipe blood and body fluids from wound site.
+    - Peel away chest seal backer.
+    - Place chest seal with circle of vents over wound site and seal to chest.
+

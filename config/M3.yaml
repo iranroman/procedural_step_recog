@@ -1,0 +1,13 @@
+_BASE_: STEPGRU_BASE.yaml
+MODEL:
+  OMNIGRU_CHECKPOINT_URL: 
+  OUTPUT_DIM: 5
+  
+SKILLS:
+  - NAME: M3 - Apply pressure dressing
+    STEPS:
+    - Apply direct hand pressure.
+    - Open dressing packaging.
+    - Apply dressing with pressure point directly over wound site.
+    - Wrap dressing around affected area extremity or trunk with 80 percent elastic stretch.
+    - Secure dressing with securing device.
