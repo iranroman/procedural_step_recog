@@ -9,14 +9,18 @@
         |_ task3.txt
         ...
     |_ training_videos
-        |_ TR-1
-            |_ TR_1.mp4
-            |_ TR_1_step_labels_by_frame.txt
+        |_ T1-1
+            |_ T1_1.mp4
+            |_ T1_1_step_labels_by_frame.txt
             |_ frames
-                |_TR_1_frame_0000000001.png
-                |_TR_1_frame_0000000002.png
-                |_TR_1_frame_0000000003.png
+                |_frame_0000000001.png
+                |_frame_0000000002.png
+                |_frame_0000000003.png
 
+        |_ T2-1
+        ...
+    |_ testing_videos
+        ...
 ```
 
 where each `procedure_description/taskX.txt` file looks like:
