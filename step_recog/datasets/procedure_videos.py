@@ -2,11 +2,13 @@ import os
 import pandas as pd
 import torch
 import numpy as np
+from pathlib import Path
 from torch.utils.data import Dataset
 from torchvision.io import read_image
 from torchvision.utils import save_image
 import torchvision.transforms as T
 import torchvision.transforms.functional as TF
+
 
 __DATA_DIR__ = '/vast/irr2020/BBN'
 
@@ -37,8 +39,14 @@ class ProceduralStepsDataset(Dataset):
         """
         self.data_dir = data_dir
         self.video_names = []
-        self.load_and_shuffle_video_names(split)
-        self.partition_videos(k_fold_cross_validation, Kfolds, fold_split, val_fold)
+        if split == 'test':
+            path = Path(os.path.join(self.data_dir,'test_videos'))
+            self.video_names = [str(file) for file in path.rglob('*.mp4')]
+            self.video_skill = [os.path.basename(os.path.dirname(v)) for v in self.video_names]
+            self.video_names = [os.path.basename(v)[:-4] for v in self.video_names]
+        else:
+            self.load_and_shuffle_video_names(split)
+            self.partition_videos(k_fold_cross_validation, Kfolds, fold_split, val_fold)
         self.video_info = self.load_video_info(split)
         self.split = split
         self.frame_buffer_size = frame_buffer_size
@@ -113,11 +121,15 @@ class ProceduralStepsDataset(Dataset):
         Retrieves the video at the specified index.
         """
         video_name = self.video_names[idx]
-        print(video_name)
         video_fps = self.video_info.loc[video_name].video_fps
         video_dur = self.video_info.loc[video_name].video_duration
-        video_frames_path = os.path.join(self.data_dir,f'{self.split}_videos',video_name,'frames')
-        path = os.path.join(self.data_dir, f'{self.split}_videos',video_name,f'{video_name}.skill_labels_by_frame.txt')
+        if self.split == 'test':
+            skill_name = self.video_skill[idx]
+            video_frames_path = os.path.join(self.data_dir,f'{self.split}_videos',skill_name,video_name)
+            path = os.path.join(self.data_dir, f'{self.split}_videos',skill_name,f'{video_name}.skill_labels_by_frame.txt')
+        else:
+            video_frames_path = os.path.join(self.data_dir,f'{self.split}_videos',video_name,'frames')
+            path = os.path.join(self.data_dir, f'{self.split}_videos',video_name,f'{video_name}.skill_labels_by_frame.txt')
         with open(path, 'r') as file:
             video_labels = file.read().splitlines()
         video_labels = [l.split('\t') for l in video_labels]
@@ -155,7 +167,11 @@ class ProceduralStepsDataset(Dataset):
             curr_hue = 0.0
 
         # create the initial buffer of frames
-        first_frame = read_image(os.path.join(video_frames_path,f'frame_{1:010d}.jpg'))
+        if self.split == 'test':
+            first_frame = read_image(os.path.join(video_frames_path,f'frame_{1:010d}.jpg'))
+            first_frame = TF.resize(first_frame, (self.image_resolution, self.image_resolution))
+        else:
+            first_frame = read_image(os.path.join(video_frames_path,f'frame_{1:010d}.jpg'))
         if self.augment_images and image_augment:
             if 'HorizontalFlip' in self.image_augmentations:
                 if flip:
@@ -178,7 +194,10 @@ class ProceduralStepsDataset(Dataset):
             else:
                 curr_frame = first_frame
 
-            video_frames.append(curr_frame[:,:,width_index:width_index+self.image_resolution])
+            if self.split == 'test':
+                video_frames.append(curr_frame)
+            else:
+                video_frames.append(curr_frame[:,:,width_index:width_index+self.image_resolution])
             #save_image(video_frames[-1]/255,f'{video_name}/frame{loader_frame_count}.png')
 
         # get first label
@@ -200,7 +219,11 @@ class ProceduralStepsDataset(Dataset):
             buffer_time += 1/self.target_fps
 
             frame_number = int(video_fps*buffer_time)
-            curr_frame = read_image(os.path.join(video_frames_path,f'frame_{frame_number:010d}.jpg'))
+            if self.split == 'test':
+                curr_frame = read_image(os.path.join(video_frames_path,f'frame_{frame_number:010d}.jpg'))
+                curr_frame = TF.resize(curr_frame, (self.image_resolution, self.image_resolution))
+            else:
+                curr_frame = read_image(os.path.join(video_frames_path,f'frame_{frame_number:010d}.jpg'))
             frame_label = [i for i,r in enumerate(ranges) if frame_number in r]
             assert len(frame_label) <= 1
             if frame_label:
@@ -287,8 +310,11 @@ class ProceduralStepsDataset(Dataset):
             #font = ImageFont.load_default()#truetype("arial.ttf", size=24)
             #draw.text((width_index+10,35), text, font=font, fill="white") 
             #curr_frame = TF.to_tensor(pil_img)*255
-
-            video_frames.append(curr_frame[:,:,width_index:width_index+self.image_resolution])
+            
+            if self.split == 'test':
+                video_frames.append(curr_frame)
+            else:
+                video_frames.append(curr_frame[:,:,width_index:width_index+self.image_resolution])
             #save_image(video_frames[-1]/255,f'{video_name}/frame{loader_frame_count}.png')
 
             # new update target_fps

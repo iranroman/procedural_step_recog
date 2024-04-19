@@ -21,7 +21,7 @@
 
         |_ T2-1
         ...
-    |_ testing_videos
+    |_ test_videos
         ...
 ```
 

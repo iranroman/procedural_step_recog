@@ -1,6 +1,13 @@
 import torch
 from torch import nn
 
+__SKILL_STEPS__ = {
+    'M2': torch.tensor([11,12,2,15,6,12,14,7,18]),
+    'M3': torch.tensor([1,8,0,17,14,18]),
+    'M5': torch.tensor([8,4,5,13,1,18]),
+    'R18': torch.tensor([3,8,16,9,10,18])
+}
+
 class Decapitvore(nn.Module):
     def __init__(self, cfg):
         super().__init__()
@@ -40,7 +47,7 @@ class StepNet(nn.Module):
         #self.softmax = nn.Softmax(-1)
 
 
-    def forward(self, x):
+    def forward(self, x, skill=None):
 
         vid_embeds = []
         omni_outs = []
@@ -61,7 +68,10 @@ class StepNet(nn.Module):
         gru_out,hidden = self.gru_states(y_hat_steps)
         y_hat_state_machine = self.gru_dense_state_machine(gru_out).permute(1,0,2)
         y_hat_state_machine = y_hat_state_machine.reshape(y_hat_steps.shape[0],y_hat_steps.shape[1],y_hat_steps.shape[2]-1,-1)
-        return y_hat_steps, y_hat_state_machine, omni_outs
+        if skill:
+            return y_hat_steps, y_hat_state_machine, omni_outs, __SKILL_STEPS__[skill]
+        else:
+            return y_hat_steps, y_hat_state_machine, omni_outs
 
 
 if __name__ == "__main__":
