@@ -27,7 +27,7 @@ def main(cfg):
 
     best_val_accuracy = 0
 
-    __ID_SKILL__ = cfg['MODEL']['ID_SKILL']
+    __ID_SKILL__ = cfg['MODEL']['SKILL_ID']
 
     for epoch in range(cfg['TRAIN']['EPOCHS']):
         model.train()

@@ -25,7 +25,7 @@ def main(cfg):
     criterion_steps = nn.CrossEntropyLoss(reduction='none')
     criterion_states = nn.CrossEntropyLoss(reduction='none')
 
-    __ID_SKILL__ = cfg['MODEL']['ID_SKILL']
+    __ID_SKILL__ = cfg['MODEL']['SKILL_ID']
 
     #dirname = f'overfit_outputs_{time}time_BS16_lab32'
     dirname = f'overfit_outputs'

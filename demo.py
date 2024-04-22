@@ -49,8 +49,8 @@ def main(video_path, skill, checkpoint_path, cfg_file="config/with_state_head.ya
             x = cv2.resize(frame, (224, 224))
             x = cv2.cvtColor(x, cv2.COLOR_BGR2RGB)
 
-            buffer = model.insert_image_buffer(x, buffer).clone()
-            y_hat_steps, y_hat_state_machine, omni_outs, h = model(buffer, h)
+            buffer = model.insert_image_buffer(x, buffer)
+            y_hat_steps, y_hat_state_machine, omni_outs, h = model(buffer.clone(), h)
             prob_step, prob_state = model.skill_step_proba(y_hat_steps, y_hat_state_machine, skill=skill)
             prob_step = prob_step[0, -1].cpu().numpy()
             if prob_state is not None:

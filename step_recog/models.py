@@ -44,7 +44,7 @@ class StepNet(nn.Module):
         self.SKILL_STEPS = cfg['MODEL']['SKILL_STEPS']
         self.SKILL_MASKS = {
             k: np.isin(np.arange(cfg['DATASET']['NSTEPS']), idxs)
-            for k, idxs in self.SKILL_STEPS
+            for k, idxs in self.SKILL_STEPS.items()
         }
 
     def insert_image_buffer(self, x, output=None):
@@ -66,8 +66,7 @@ class StepNet(nn.Module):
         omni_outs = []
         # (batch, time, ch, height, weight) -> (batch, ch, time, height, weight)
         x = x.permute(0,2,1,3,4)
-        x -= self.vid_mean[None,:]
-        x /= self.vid_std[None,:]
+        x = (x - self.vid_mean[:,None,None,None]) / (self.vid_std[:,None,None,None])
         for t in range(x.shape[2]-self.vid_nframes+1):
             x_vid = x[:,:,t:t+self.vid_nframes]
             assert x_vid.shape[2] == self.vid_nframes
