@@ -7,19 +7,6 @@ from step_recog.models import StepNet
 from torch.utils.data import DataLoader
 import wandb
 
-__SKILL_ID__ = {
-    'M2': 0,
-    'M3': 1,
-    'M5': 2,
-    'R18': 3,
-}
-
-__ID_SKILL__ = {
-    0:'M2',
-    1:'M3',
-    2:'M5',
-    3:'R18',
-}
 
 def main(cfg):
     wandb.init(project="bbn_ptg_stepnet", config=cfg)
@@ -40,12 +27,14 @@ def main(cfg):
 
     best_val_accuracy = 0
 
+    __ID_SKILL__ = cfg['MODEL']['ID_SKILL']
+
     for epoch in range(cfg['TRAIN']['EPOCHS']):
         model.train()
         for images, step_labels, states, skill_id in tr_loader:
             images, step_labels, states = images.to(device), step_labels.to(device), states.to(device)
             optimizer.zero_grad()
-            yhat_steps, yhat_state_machine, yhat_omnivore = model(images)
+            yhat_steps, yhat_state_machine, yhat_omnivore, h = model(images)
             loss_steps = criterion_steps(yhat_steps.permute(0, 2, 1), step_labels)
             loss_states = criterion_states(yhat_state_machine.permute(0, 3, 1, 2), states)
             loss = loss_steps.mean() + loss_states.mean()
@@ -68,7 +57,8 @@ def main(cfg):
         with torch.no_grad():
             for images, step_labels, states, skill_id in vl_loader:
                 images, step_labels, states, skill_id = images.to(device), step_labels.to(device), states.to(device), skill_id.to(device)
-                yhat_steps, yhat_state_machine, yhat_omnivore, skill_steps = model(images, __ID_SKILL__[skill_id[0].item()])
+                yhat_steps, yhat_state_machine, yhat_omnivore, h = model(images)
+                skill_steps = model.SKILL_STEPS[__ID_SKILL__[skill_id[0].item()]]
                 preds_steps = torch.argmax(yhat_steps, dim=2)
                 preds_states = torch.argmax(yhat_state_machine, dim=3)
                 total_accuracy_steps += (preds_steps == step_labels).float().mean().item()
@@ -135,6 +125,14 @@ if __name__ == "__main__":
             "GRU_INPUT_SIZE": 1024,
             "GRU_DROPOUT": 0.5,
             "GRU_NUM_LAYERS": 2,
+            "USE_STATE_HEAD": False,
+            "SKILL_ID": ['M2', 'M3', 'M5', 'R18'],
+            "SKILL_STEPS": {
+                "M2": [11,12,2,15,6,12,14,7,18],
+                "M3": [1,8,0,17,14,18],
+                "M5": [8,4,5,13,1,18],
+                "R18": [3,8,16,9,10,18],
+            }
         },
         'DATASET': {
             'DIR' : '/vast/irr2020/BBN',

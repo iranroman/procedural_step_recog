@@ -26,7 +26,7 @@ def main(cfg):
         for i, (images, step_labels, states) in enumerate(test_loader):
             print(test_data.video_names[i])
             images, step_labels, states = images.to(device), step_labels.to(device), states.to(device)
-            yhat_steps, yhat_state, yhat_omnivore, skill_steps = model(images,test_data.video_skill[i])
+            yhat_steps, yhat_state, yhat_omnivore, h = model(images)
             preds_steps = torch.argmax(yhat_steps, dim=2)
             total_accuracy_steps += (preds_steps == step_labels).sum().item() / step_labels.shape[-1]
             np.save(f'test_outputs/{i}_step_labels',step_labels.cpu().numpy())
@@ -51,6 +51,14 @@ if __name__ == "__main__":
             "GRU_INPUT_SIZE": 1024,
             "GRU_DROPOUT": 0.5,
             "GRU_NUM_LAYERS": 2,
+            "USE_STATE_HEAD": False,
+            "SKILL_ID": ['M2', 'M3', 'M5', 'R18'],
+            "SKILL_STEPS": {
+                "M2": [11,12,2,15,6,12,14,7,18],
+                "M3": [1,8,0,17,14,18],
+                "M5": [8,4,5,13,1,18],
+                "R18": [3,8,16,9,10,18],
+            }
         },
         'DATASET': {
             'DIR' : '/vast/irr2020/BBN',
