@@ -18,7 +18,7 @@ class Decapitvore(nn.Module):
         return shoul, y_raw
 
 class StepNet(nn.Module):
-    def __init__(self,cfg,device):
+    def __init__(self,cfg,device=None):
         super().__init__()
         
         self.dropout = nn.Dropout(cfg['MODEL']['GRU_DROPOUT'])
@@ -48,7 +48,7 @@ class StepNet(nn.Module):
 
     def insert_image_buffer(self, x, output=None):
         if x.ndim == 3:  # (H, W, C) -> (B, T, C, H, W)
-            x = torch.as_tensor(x).permute(2, 0, 1).float()[None, None]
+            x = torch.as_tensor(x).permute(2, 0, 1)[None, None]
         # (B, T, C, H, W)
         x = torch.as_tensor(x).to(self.vid_mean.device)
         if output is None:

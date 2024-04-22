@@ -50,12 +50,19 @@ def main(video_path, skill, checkpoint_path, cfg_file="config/with_state_head.ya
             if idx % int(og_fps / fps) != 0:
                continue
 
+            
             x = cv2.resize(frame, (224, 224))
             x = cv2.cvtColor(x, cv2.COLOR_BGR2RGB)
-
+            x = x.astype(np.float32) / 255.0
             buffer = model.insert_image_buffer(x, buffer)
+            assert buffer.shape == (1, 32, 3, 224, 224)
+            assert 0.3 < buffer.max() <= 1
+            assert 0 <= buffer.min() < 1
+
             y_hat_steps, y_hat_state_machine, omni_outs, h = model(buffer.clone(), h)
+
             prob_step, prob_state = model.skill_step_proba(y_hat_steps, y_hat_state_machine, skill=skill)
+            
             prob_step = prob_step[0, -1].cpu().numpy()
             if prob_state is not None:
                 prob_state = prob_state[0, -1].cpu().numpy()
@@ -65,7 +72,7 @@ def main(video_path, skill, checkpoint_path, cfg_file="config/with_state_head.ya
                 idx_state = sm.current_state
 
             # np.round(prob_state.astype(float), 2).tolist()
-            tqdm.tqdm.write(f'{np.round(prob_step.astype(float), 4).tolist()}  {idx_state}')
+            tqdm.tqdm.write(f'{idx_state}  {np.round(prob_step.astype(float), 2).tolist()}')
             step_idx = (np.where(idx_state==1)[0].tolist() or [len(STEPS)])[0]
             step_desc = "No step" if step_idx >= len(STEPS) else STEPS[step_idx]
             pbar.set_description(step_desc)         
