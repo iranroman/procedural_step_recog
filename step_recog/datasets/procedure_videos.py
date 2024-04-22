@@ -388,9 +388,6 @@ class ProceduralStepsDataset(Dataset):
         return video_frames, step_label, torch.cat(state_label,dim=0).long(), video_skill_id
 
 
-
-
-
 if __name__ == "__main__":
 
     __DATA_DIR__ = '/vast/irr2020/BBN'
