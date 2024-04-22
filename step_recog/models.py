@@ -2,10 +2,10 @@ import torch
 from torch import nn
 
 __SKILL_STEPS__ = {
-    'M2': torch.tensor([11,12,2,15,6,12,14,7,18]),
-    'M3': torch.tensor([1,8,0,17,14,18]),
-    'M5': torch.tensor([8,4,5,13,1,18]),
-    'R18': torch.tensor([3,8,16,9,10,18])
+    'M2': torch.tensor([11,13,2,16,6,12,15,7,19]),
+    'M3': torch.tensor([1,8,0,18,15,19]),
+    'M5': torch.tensor([8,4,5,14,1,19]),
+    'R18': torch.tensor([3,8,17,9,10,19])
 }
 
 class Decapitvore(nn.Module):
@@ -40,7 +40,7 @@ class StepNet(nn.Module):
 
         self.gru = nn.GRU(cfg['MODEL']['GRU_INPUT_SIZE'],cfg['MODEL']['GRU_INPUT_SIZE'],cfg['MODEL']['GRU_NUM_LAYERS'],dropout=cfg['MODEL']['GRU_DROPOUT'])
         self.gru_dense_steps = nn.Linear(cfg['MODEL']['GRU_INPUT_SIZE'],cfg['DATASET']['NSTEPS'])
-        self.gru_states = nn.GRU(cfg['DATASET']['NSTEPS'],cfg['MODEL']['GRU_INPUT_SIZE'],1,dropout=cfg['MODEL']['GRU_DROPOUT'])
+        self.gru_states = nn.GRU(cfg['DATASET']['NSTEPS'],cfg['MODEL']['GRU_INPUT_SIZE'],1)
         self.gru_dense_state_machine = nn.Linear(cfg['MODEL']['GRU_INPUT_SIZE'],(cfg['DATASET']['NSTEPS']-1)*cfg['DATASET']['NMACHINESTATES'])
 
         self.relu = nn.ReLU()
@@ -69,7 +69,7 @@ class StepNet(nn.Module):
         y_hat_state_machine = self.gru_dense_state_machine(gru_out).permute(1,0,2)
         y_hat_state_machine = y_hat_state_machine.reshape(y_hat_steps.shape[0],y_hat_steps.shape[1],y_hat_steps.shape[2]-1,-1)
         if skill:
-            return y_hat_steps, y_hat_state_machine, omni_outs, __SKILL_STEPS__[skill]
+            return y_hat_steps, y_hat_state_machine, omni_outs, __SKILL_STEPS__[skill].to(self.device)
         else:
             return y_hat_steps, y_hat_state_machine, omni_outs
 
