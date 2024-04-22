@@ -26,10 +26,12 @@ def main(video_path, skill, checkpoint_path, cfg_file="config/with_state_head.ya
     '''
     # create video reader and video writer
     video_info = sv.VideoInfo.from_video_path(video_path)
+    og_fps = video_info.fps
+    video_info.fps = fps
 
     # define model
     cfg = yaml.load(open(cfg_file), Loader=yaml.CLoader)
-    model = StepNet(cfg).to(device).eval()
+    model = StepNet(cfg).eval().to(device)
     checkpoint = torch.load(checkpoint_path, map_location=device)
     model.load_state_dict(checkpoint)
 
@@ -39,11 +41,13 @@ def main(video_path, skill, checkpoint_path, cfg_file="config/with_state_head.ya
 
     h = None
     buffer = None
+    skip_n = max(int(og_fps / fps), 1)
+    print(output_path, video_info, skip_n)
     with sv.VideoSink(output_path, video_info=video_info) as sink:
         # iterate over video frames
-        pbar = tqdm.tqdm(enumerate(sv.get_video_frames_generator(video_path)))
+        pbar = tqdm.tqdm(enumerate(sv.get_video_frames_generator(video_path)), total=video_info.total_frames)
         for idx, frame in pbar:
-            if idx % int(video_info.fps / fps) != 0:
+            if idx % int(og_fps / fps) != 0:
                continue
 
             x = cv2.resize(frame, (224, 224))

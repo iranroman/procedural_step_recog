@@ -18,7 +18,7 @@ class Decapitvore(nn.Module):
         return shoul, y_raw
 
 class StepNet(nn.Module):
-    def __init__(self,cfg):
+    def __init__(self,cfg,device):
         super().__init__()
         
         self.dropout = nn.Dropout(cfg['MODEL']['GRU_DROPOUT'])
@@ -34,9 +34,8 @@ class StepNet(nn.Module):
         self.gru_dense_steps = nn.Linear(cfg['MODEL']['GRU_INPUT_SIZE'],cfg['DATASET']['NSTEPS'])
 
         self.use_state_head = cfg['MODEL']['USE_STATE_HEAD']
-        if self.use_state_head:
-            self.gru_states = nn.GRU(cfg['DATASET']['NSTEPS'],cfg['MODEL']['GRU_INPUT_SIZE'],1)
-            self.gru_dense_state_machine = nn.Linear(cfg['MODEL']['GRU_INPUT_SIZE'],(cfg['DATASET']['NSTEPS']-1)*cfg['DATASET']['NMACHINESTATES'])
+        self.gru_states = nn.GRU(cfg['DATASET']['NSTEPS'],cfg['MODEL']['GRU_INPUT_SIZE'],1)
+        self.gru_dense_state_machine = nn.Linear(cfg['MODEL']['GRU_INPUT_SIZE'],(cfg['DATASET']['NSTEPS']-1)*cfg['DATASET']['NMACHINESTATES'])
 
         self.relu = nn.ReLU()
         #self.softmax = nn.Softmax(-1)
@@ -61,12 +60,13 @@ class StepNet(nn.Module):
     def forward(self, x, h=None):
         h_step, h_state = h if h is not None else (None, None)
 
-        # encode omnivore
-        vid_embeds = []
-        omni_outs = []
         # (batch, time, ch, height, weight) -> (batch, ch, time, height, weight)
         x = x.permute(0,2,1,3,4)
         x = (x - self.vid_mean[:,None,None,None]) / (self.vid_std[:,None,None,None])
+
+        # encode omnivore
+        vid_embeds = []
+        omni_outs = []
         for t in range(x.shape[2]-self.vid_nframes+1):
             x_vid = x[:,:,t:t+self.vid_nframes]
             assert x_vid.shape[2] == self.vid_nframes
@@ -82,6 +82,7 @@ class StepNet(nn.Module):
         y_hat_steps = self.gru_dense_steps(gru_out).permute(1,0,2)
 
         # predict states
+        y_hat_state_machine=None
         if self.use_state_head:
             gru_out, h_state = self.gru_states(y_hat_steps)
             y_hat_state_machine = self.gru_dense_state_machine(gru_out).permute(1,0,2)
