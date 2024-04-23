@@ -1,5 +1,8 @@
 import os
+
+import PIL.Image
 os.environ['PYTORCH_ENABLE_MPS_FALLBACK']='1'
+import PIL
 import tqdm
 import yaml
 import cv2
@@ -8,6 +11,7 @@ import supervision as sv
 import numpy as np
 from step_recog.models import StepNet
 from step_recog.statemachine import ProcedureStateMachine
+import matplotlib.pyplot as plt
 
 STATES = [
     (128, 128, 128), ##unobserved = grey
@@ -20,7 +24,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu' #'mps' if torch.backends
 import ipdb
 @ipdb.iex
 @torch.no_grad()
-def main(video_path, skill, checkpoint_path, cfg_file="config/with_state_head.yaml", output_path='output.mp4', fps=10):
+def main(video_path, skill, checkpoint_path, cfg_file="config/without_state_head.yaml", output_path='output.mp4', fps=10):
     '''Visualize the outputs of the model on a video.
 
     '''
@@ -31,13 +35,16 @@ def main(video_path, skill, checkpoint_path, cfg_file="config/with_state_head.ya
 
     # define model
     cfg = yaml.load(open(cfg_file), Loader=yaml.CLoader)
-    model = StepNet(cfg).eval().to(device)
+    model = StepNet(cfg, device).eval().to(device)
     checkpoint = torch.load(checkpoint_path, map_location=device)
     model.load_state_dict(checkpoint)
 
     sm = ProcedureStateMachine(len(model.SKILL_STEPS[skill]))
 
     STEPS = [f'{i}' for i in range(len(model.SKILL_STEPS[skill]))]
+
+    y_outputs = []
+    state_outputs = []
 
     h = None
     buffer = None
@@ -49,20 +56,29 @@ def main(video_path, skill, checkpoint_path, cfg_file="config/with_state_head.ya
         for idx, frame in pbar:
             if idx % int(og_fps / fps) != 0:
                continue
-
+            # if idx > 100: break
             
             x = cv2.resize(frame, (224, 224))
             x = cv2.cvtColor(x, cv2.COLOR_BGR2RGB)
             x = x.astype(np.float32) / 255.0
+            x = torch.as_tensor(x).permute(2, 0, 1)[None, None]
+
+            # x = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # x = model.transform_image(PIL.Image.fromarray(x))[None, None]
+
             buffer = model.insert_image_buffer(x, buffer)
             assert buffer.shape == (1, 32, 3, 224, 224)
-            assert 0.3 < buffer.max() <= 1
-            assert 0 <= buffer.min() < 1
+            # assert 0.3 < buffer.max() <= 1
+            # assert 0 <= buffer.min() < 1
+
+            # for i, a in enumerate(buffer[0]):
+            #     cv2.imwrite(f'asdf{i}.png', (a.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)[:,:,::-1])
+            # input()
 
             y_hat_steps, y_hat_state_machine, omni_outs, h = model(buffer.clone(), h)
 
             prob_step, prob_state = model.skill_step_proba(y_hat_steps, y_hat_state_machine, skill=skill)
-            
+
             prob_step = prob_step[0, -1].cpu().numpy()
             if prob_state is not None:
                 prob_state = prob_state[0, -1].cpu().numpy()
@@ -80,6 +96,27 @@ def main(video_path, skill, checkpoint_path, cfg_file="config/with_state_head.ya
             # draw the prediction (could be your bar chart) on the frame
             plot_graph(frame, prob_step, step_desc, idx_state)
             sink.write_frame(frame)
+
+            y_outputs.append(prob_step)
+            state_outputs.append(idx_state.copy())
+
+    y_outputs = np.array(y_outputs)
+    state_outputs = np.array(state_outputs)
+    plt.figure(figsize=(16, 8))
+    plt.subplot(311)
+    plt.title(f'{os.path.basename(video_path).rsplit(".",1)[0]}')
+    plt.imshow(y_outputs.T, interpolation='none', aspect='auto', origin='lower')
+    y_pred = np.argmax(y_outputs, axis=1)
+    plt.scatter(np.arange(len(y_outputs)), y_pred, c='white', alpha=0.7)
+    plt.subplot(312)
+    plt.title("State")
+    plt.imshow(state_outputs.T, interpolation='none', aspect='auto', origin='lower', vmin=0, vmax=2)
+    plt.subplot(313)
+    plt.title("Confidence")
+    plt.plot(y_outputs[np.arange(len(y_pred)), y_pred])
+    plt.ylim([0, 1])
+    plt.savefig(f'{output_path}.png')
+    plt.close()
 
     ##TODO: Review the offsets
     ##colors in BGR
