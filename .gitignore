@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# mac
+.DS_Store
+
+# # dont upload model weights
+*.pt
+*.pth
+*.ckpt
+# dont upload videos
+*.mp4
+/*.png
+
+results*
+
+# trash folders
+shh/
+shhh/
+shhhh/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
