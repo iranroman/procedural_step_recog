@@ -1,8 +1,6 @@
 import os
-
-import PIL.Image
 os.environ['PYTORCH_ENABLE_MPS_FALLBACK']='1'
-import PIL
+from PIL import Image
 import tqdm
 import yaml
 import cv2
@@ -68,8 +66,8 @@ def main(video_path, skill, checkpoint_path, cfg_file="config/without_state_head
 
             buffer = model.insert_image_buffer(x, buffer)
             assert buffer.shape == (1, 32, 3, 224, 224)
-            # assert 0.3 < buffer.max() <= 1
-            # assert 0 <= buffer.min() < 1
+            assert 0.3 < buffer.max() <= 1
+            assert 0 <= buffer.min() < 1
 
             # for i, a in enumerate(buffer[0]):
             #     cv2.imwrite(f'asdf{i}.png', (a.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)[:,:,::-1])
