@@ -61,7 +61,7 @@ class StepNet(nn.Module):
             return x.repeat(1, self.vid_nframes, 1, 1, 1)
         if x.shape[1] >= output.shape[1]:
             return x
-        return torch.cat([output[:, x.shape[1]:], x], dim=1)
+        return torch.cat([output[:, 1:], x], dim=1)
 
     def forward(self, x, h=None):
         h_step, h_state = h if h is not None else (None, None)
