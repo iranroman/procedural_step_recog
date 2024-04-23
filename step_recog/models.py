@@ -84,13 +84,13 @@ class StepNet(nn.Module):
         vid_embeds = self.dropout(self.relu(self.video_dense(vid_embeds)))
 
         # predict steps
-        gru_out, h_step = self.gru(vid_embeds)
+        gru_out, h_step = self.gru(vid_embeds, h_step)
         y_hat_steps = self.gru_dense_steps(gru_out).permute(1,0,2)
 
         # predict states
         y_hat_state_machine=None
         if self.use_state_head:
-            gru_out, h_state = self.gru_states(y_hat_steps)
+            gru_out, h_state = self.gru_states(y_hat_steps, h_state)
             y_hat_state_machine = self.gru_dense_state_machine(gru_out).permute(1,0,2)
             y_hat_state_machine = y_hat_state_machine.reshape(y_hat_steps.shape[0],y_hat_steps.shape[1],y_hat_steps.shape[2]-1,-1)
         
