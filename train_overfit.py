@@ -9,19 +9,6 @@ import wandb
 import os
 import numpy as np
 
-__SKILL_ID__ = {
-    'M2': 0,
-    'M3': 1,
-    'M5': 2,
-    'R18': 3,
-}
-
-__ID_SKILL__ = {
-    0:'M2',
-    1:'M3',
-    2:'M5',
-    3:'R18',
-}
 
 def main(cfg):
     wandb.init(project="bbn_ptg_nyu", config=cfg)
@@ -38,6 +25,8 @@ def main(cfg):
     criterion_steps = nn.CrossEntropyLoss(reduction='none')
     criterion_states = nn.CrossEntropyLoss(reduction='none')
 
+    __ID_SKILL__ = cfg['MODEL']['SKILL_ID']
+
     #dirname = f'overfit_outputs_{time}time_BS16_lab32'
     dirname = f'overfit_outputs'
     os.makedirs(f'{dirname}')
@@ -52,7 +41,7 @@ def main(cfg):
             for i in range(1000): # to overfit
                 model.train()
                 optimizer.zero_grad()
-                yhat_steps, yhat_state_machine, omni_outs = model(images)
+                yhat_steps, yhat_state_machine, omni_outs, h = model(images)
                 loss_steps = criterion_steps(yhat_steps.permute(0, 2, 1), step_labels)
                 loss_states = criterion_states(yhat_state_machine.permute(0, 3, 1, 2), states)
                 loss = loss_steps.mean() + loss_states.mean()
@@ -73,7 +62,8 @@ def main(cfg):
                 total_R18 = 0
                 with torch.no_grad():
                     for i, (image, step_label, state, skillid) in enumerate(zip(images, step_labels,states,skill_id)):
-                        yhat_steps, yhat_state_machine, _, skill_steps = model(image[None], __ID_SKILL__[skillid.item()])
+                        yhat_steps, yhat_state_machine, _, h = model(image[None])
+                        skill_steps = model.SKILL_STEPS[__ID_SKILL__[skillid.item()]]
                         preds_steps = torch.argmax(yhat_steps, dim=2)
                         preds_states = torch.argmax(yhat_state_machine, dim=3)
                         np.save(f'{dirname}/yhat_steps_{i}',yhat_steps.cpu().numpy())
@@ -142,6 +132,14 @@ if __name__ == "__main__":
             "GRU_INPUT_SIZE": 1024,
             "GRU_DROPOUT": 0.5,
             "GRU_NUM_LAYERS": 2,
+            "USE_STATE_HEAD": False,
+            "SKILL_ID": ['M2', 'M3', 'M5', 'R18'],
+            "SKILL_STEPS": {
+                "M2": [11,12,2,15,6,12,14,7,18],
+                "M3": [1,8,0,17,14,18],
+                "M5": [8,4,5,13,1,18],
+                "R18": [3,8,16,9,10,18],
+            }
         },
         'DATASET': {
             'DIR' : '/vast/irr2020/BBN',
