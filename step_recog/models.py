@@ -2,10 +2,10 @@ import torch
 from torch import nn
 
 __SKILL_STEPS__ = {
-    'M2': torch.tensor([11,13,2,16,6,12,15,7,19]),
-    'M3': torch.tensor([1,8,0,18,15,19]),
-    'M5': torch.tensor([8,4,5,14,1,19]),
-    'R18': torch.tensor([3,8,17,9,10,19])
+    'M2': torch.tensor([10,12,2,15,5,11,14,6,18]),
+    'M3': torch.tensor([1,7,0,17,14,18]),
+    'M5': torch.tensor([7,3,4,13,1,18]),
+    'R18': torch.tensor([1,7,16,8,9,18])
 }
 
 class Decapitvore(nn.Module):

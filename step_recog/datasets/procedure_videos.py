@@ -193,7 +193,8 @@ class ProceduralStepsDataset(Dataset):
         video_fps = self.video_info.loc[video_name].video_fps
         video_dur = self.video_info.loc[video_name].video_duration
         video_skill = self.video_skills[idx]
-        assert video_skill in video_name
+        if self.split != 'test':
+            assert video_skill in video_name
         video_skill_id = torch.tensor(__SKILL_ID__[video_skill])
 
         step_ranges, video_frames_path, video_step_names = self.get_video_step_frames(idx, video_name)
@@ -270,7 +271,7 @@ class ProceduralStepsDataset(Dataset):
 
         buffer_time = 0
 
-        while buffer_time < video_dur-1:
+        while buffer_time < video_dur-1.1:
             loader_frame_count += 1
 
             # dequeue and add frames as we progress through the video

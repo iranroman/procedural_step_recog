@@ -34,6 +34,10 @@ def main(cfg):
     vl_loader = DataLoader(vl_data, batch_size=1, num_workers=cfg['DATASET']['NWORKERS'])
 
     model = StepNet(cfg,device).to(device)
+    if 'FINETUNE' in cfg and cfg['FINETUNE']:
+        model.load_state_dict(torch.load(cfg['CHECKPOINT']), strict=False)
+        print('loaded checkpoint',cfg['CHECKPOINT'])
+
     optimizer = optim.Adam(model.parameters(), lr=cfg['TRAIN']['LR'])
     criterion_steps = nn.CrossEntropyLoss(reduction='none')
     criterion_states = nn.CrossEntropyLoss(reduction='none')
@@ -48,7 +52,7 @@ def main(cfg):
             yhat_steps, yhat_state_machine, yhat_omnivore = model(images)
             loss_steps = criterion_steps(yhat_steps.permute(0, 2, 1), step_labels)
             loss_states = criterion_states(yhat_state_machine.permute(0, 3, 1, 2), states)
-            loss = loss_steps.mean() + loss_states.mean()
+            loss = loss_steps.mean()# + loss_states.mean()
             loss.backward()
             optimizer.step()
             wandb.log({"train_loss": loss.item()})
@@ -115,8 +119,8 @@ def main(cfg):
 
         if accuracy_steps > best_val_accuracy:
             best_val_accuracy = accuracy_steps
-            torch.save(model.state_dict(), 'best_model.pth')
-            wandb.save('best_model.pth')
+            torch.save(model.state_dict(), 'best_model_new.pth')
+            wandb.save('best_model_new.pth')
 
     wandb.finish()
 
@@ -139,7 +143,7 @@ if __name__ == "__main__":
         'DATASET': {
             'DIR' : '/vast/irr2020/BBN',
             'VAL_FOLD' : VAL_FOLD,
-            'NSTEPS': 20, #including NO STEP
+            'NSTEPS': 19, #including NO STEP
             'NMACHINESTATES':3,
             'BATCH_SIZE': 32,
             'NWORKERS': 0,
@@ -148,6 +152,9 @@ if __name__ == "__main__":
             'LR': 0.001,
             'EPOCHS': 50,
         },
+        #'CHECKPOINT':'wandb/run-20240421_001348-vpxucy1t/files/best_model.pth',
+        #'CHECKPOINT':'wandb/run-20240421_121000-dwyc8fqs/files/best_model1.pth',
+        #'FINETUNE':True,
     }
 
     main(cfg)
